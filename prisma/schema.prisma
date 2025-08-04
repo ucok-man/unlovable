@@ -19,7 +19,9 @@ model Message {
   role    MessageRole
   type    MessageType
 
-  fragment Fragment?
+  fragment  Fragment?
+  projectId String
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Fragment {
@@ -33,6 +35,16 @@ model Fragment {
 
   messageId String  @unique
   message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+
+  messages Message[]
 }
 
 enum MessageType {

@@ -173,6 +173,7 @@ export const generator = inngest.createFunction(
             content: "Something went wrong. Please try again.",
             role: "ASSISTANT",
             type: "ERROR",
+            projectId: event.data.projectId,
           },
         });
       }
@@ -182,6 +183,7 @@ export const generator = inngest.createFunction(
           content: result.state.data.summary,
           role: "ASSISTANT",
           type: "RESULT",
+          projectId: event.data.projectId,
           fragment: {
             create: {
               sandboxUrl: sandboxUrl,

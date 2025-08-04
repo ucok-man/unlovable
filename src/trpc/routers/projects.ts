@@ -1,8 +1,9 @@
 import { inngest } from "@/inngest/client";
+import { generateSlug } from "random-word-slugs";
 import z from "zod";
 import { baseProcedure, createTRPCRouter } from "../init";
 
-export const messagesRouter = createTRPCRouter({
+export const projectsRouter = createTRPCRouter({
   create: baseProcedure
     .input(
       z.object({
@@ -11,36 +12,42 @@ export const messagesRouter = createTRPCRouter({
           .trim()
           .min(1, { message: "Prompt message is required" })
           .max(1000, { message: "Prompt message is too long" }),
-        projectId: z.string().uuid({ message: "Invalid project id format" }),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const message = await ctx.db.message.create({
+      const project = await ctx.db.project.create({
         data: {
-          content: input.prompt,
-          role: "USER",
-          type: "RESULT",
-          projectId: input.projectId,
+          name: generateSlug(2, {
+            format: "kebab",
+          }),
+
+          messages: {
+            create: {
+              content: input.prompt,
+              role: "USER",
+              type: "RESULT",
+            },
+          },
         },
       });
 
       await inngest.send({
         name: "generator/run",
         data: {
-          value: message.content,
-          projectId: message.projectId,
+          value: input.prompt,
+          projectId: project.id,
         },
       });
 
-      return message;
+      return project;
     }),
 
   getAll: baseProcedure.query(async ({ ctx }) => {
-    const messages = ctx.db.message.findMany({
+    const projects = ctx.db.project.findMany({
       orderBy: {
         updatedAt: "desc",
       },
     });
-    return messages;
+    return projects;
   }),
 });
