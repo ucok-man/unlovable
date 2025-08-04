@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import { CODE_AGENT_PROMPT } from "@/lib/prompts";
 import { Sandbox } from "@e2b/code-interpreter";
 import {
@@ -5,14 +6,20 @@ import {
   createNetwork,
   createTool,
   openai,
+  Tool,
 } from "@inngest/agent-kit";
 import z from "zod";
 import { inngest } from "./client";
 import { connectSandbox, lastAssistantMessageContent } from "./utils";
 
-export const helloWorld = inngest.createFunction(
-  { id: "test" },
-  { event: "test" },
+type AgentState = {
+  summary: string;
+  files: { [path: string]: string };
+};
+
+export const generator = inngest.createFunction(
+  { id: "generator" },
+  { event: "generator/run" },
 
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
@@ -20,7 +27,7 @@ export const helloWorld = inngest.createFunction(
       return sandbox.sandboxId;
     });
 
-    const codeAgent = createAgent({
+    const codeAgent = createAgent<AgentState>({
       name: "code-agent",
       description: "An expert coding agent",
       system: CODE_AGENT_PROMPT,
@@ -71,12 +78,15 @@ export const helloWorld = inngest.createFunction(
               })
             ),
           }),
-          handler: async ({ files }, { step, network }) => {
+          handler: async (
+            { files },
+            { step, network }: Tool.Options<AgentState>
+          ) => {
             const newFiles = await step?.run(
               "create-or-update-files",
               async () => {
                 try {
-                  const updatedFiles = network.state.data.file ?? {};
+                  const updatedFiles = network.state.data.files ?? {};
                   const sandbox = await connectSandbox({ sandboxId });
                   for (const file of files) {
                     await sandbox.files.write(file.path, file.content);
@@ -150,6 +160,37 @@ export const helloWorld = inngest.createFunction(
       const sandbox = await connectSandbox({ sandboxId });
       const host = sandbox.getHost(3000);
       return `https://${host}`;
+    });
+
+    await step.run("save-result", async () => {
+      const hasError =
+        !result.state.data.summary ||
+        (Object.keys(result.state.data.files) || {}).length === 0;
+
+      if (hasError) {
+        return await db.message.create({
+          data: {
+            content: "Something went wrong. Please try again.",
+            role: "ASSISTANT",
+            type: "ERROR",
+          },
+        });
+      }
+
+      return await db.message.create({
+        data: {
+          content: result.state.data.summary,
+          role: "ASSISTANT",
+          type: "RESULT",
+          fragment: {
+            create: {
+              sandboxUrl: sandboxUrl,
+              title: "Fragment",
+              files: result.state.data.files,
+            },
+          },
+        },
+      });
     });
 
     return {

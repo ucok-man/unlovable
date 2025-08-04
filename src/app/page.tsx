@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -11,8 +11,11 @@ export default function HomePage() {
   const [input, setInput] = useState("");
 
   const trpc = useTRPC();
-  const invoke = useMutation(
-    trpc.invoke.mutationOptions({
+
+  const messages = useQuery(trpc.message.getAll.queryOptions());
+
+  const create = useMutation(
+    trpc.message.create.mutationOptions({
       onSuccess: () => {
         setInput("");
         toast.success("OK");
@@ -22,6 +25,8 @@ export default function HomePage() {
       },
     })
   );
+
+  console.log({ messages: messages.data });
 
   return (
     <div className="w-full flex justify-center items-center min-h-screen bg-stone-100">
@@ -33,10 +38,10 @@ export default function HomePage() {
         />
         <Button
           onClick={() => {
-            invoke.mutate({ value: input });
+            create.mutate({ value: input });
           }}
         >
-          Invoke
+          Send
         </Button>
       </div>
     </div>
