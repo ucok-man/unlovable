@@ -35,12 +35,24 @@ export const messagesRouter = createTRPCRouter({
       return message;
     }),
 
-  getAll: baseProcedure.query(async ({ ctx }) => {
-    const messages = ctx.db.message.findMany({
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
-    return messages;
-  }),
+  getAll: baseProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid({ message: "Invalid project id format" }),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const messages = ctx.db.message.findMany({
+        where: {
+          projectId: input.projectId,
+        },
+        orderBy: {
+          updatedAt: "asc",
+        },
+        include: {
+          fragment: true,
+        },
+      });
+      return messages;
+    }),
 });

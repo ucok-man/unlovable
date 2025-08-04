@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -15,10 +15,6 @@ export default function HomePage() {
   const [input, setInput] = useState("");
 
   const trpc = useTRPC();
-
-  const messages = useQuery(trpc.message.getAll.queryOptions());
-  console.log({ messages: messages.data });
-
   const create = useMutation(
     trpc.project.create.mutationOptions({
       onSuccess: (project) => {

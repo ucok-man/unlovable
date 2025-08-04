@@ -1,4 +1,5 @@
 import { inngest } from "@/inngest/client";
+import { TRPCError } from "@trpc/server";
 import { generateSlug } from "random-word-slugs";
 import z from "zod";
 import { baseProcedure, createTRPCRouter } from "../init";
@@ -50,4 +51,27 @@ export const projectsRouter = createTRPCRouter({
     });
     return projects;
   }),
+
+  getById: baseProcedure
+    .input(
+      z.object({
+        projectId: z.string().uuid({ message: "Invalid project id format" }),
+      })
+    )
+    .query(({ input, ctx }) => {
+      const project = ctx.db.project.findUnique({
+        where: {
+          id: input.projectId,
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          message: "No record found",
+          code: "NOT_FOUND",
+        });
+      }
+
+      return project;
+    }),
 });
