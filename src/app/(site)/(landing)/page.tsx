@@ -30,7 +30,7 @@ export default function HomePage() {
   );
 
   return (
-    <div className="w-full flex justify-center items-center min-h-screen bg-stone-100">
+    <div className="w-full flex justify-center items-center min-h-screen">
       <div className="max-w-lg w-full mx-auto space-y-4">
         <Textarea
           className="outline-1"
