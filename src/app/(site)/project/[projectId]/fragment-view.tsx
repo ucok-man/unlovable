@@ -10,7 +10,7 @@ type Props = {
   data: Fragment;
 };
 
-export default function FragmentWeb({ data }: Props) {
+export default function FragmentView({ data }: Props) {
   const [fragmentKey, setFragmentKey] = useState(0);
   const [copied, setCopied] = useState(false);
 
