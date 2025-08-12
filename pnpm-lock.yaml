@@ -134,9 +134,6 @@ importers:
       inngest:
         specifier: ^3.40.1
         version: 3.40.1(express@5.1.0)(next@15.4.5(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(typescript@5.9.2)
-      inngest-cli:
-        specifier: ^1.11.4
-        version: 1.11.4
       input-otp:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -225,6 +222,9 @@ importers:
       eslint-config-next:
         specifier: 15.4.5
         version: 15.4.5(eslint@9.33.0(jiti@2.5.1))(typescript@5.9.2)
+      inngest-cli:
+        specifier: ^1.11.4
+        version: 1.11.4
       tailwindcss:
         specifier: ^4
         version: 4.1.11

@@ -1,25 +1,37 @@
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
+import { Metadata } from "next";
 import Content from "./content";
 
-type Props = {
+interface ProjectPageProps {
   params: Promise<{
     projectId: string;
   }>;
-};
+}
 
-export default async function ProjectDetailPage(props: Props) {
-  const params = await props.params;
+export async function generateMetadata({
+  params,
+}: ProjectPageProps): Promise<Metadata> {
+  const { projectId } = await params;
 
-  prefetch(trpc.message.getAll.queryOptions({ projectId: params.projectId }));
-  prefetch(trpc.project.getById.queryOptions({ projectId: params.projectId }));
+  // You could fetch project name here for dynamic metadata
+  return {
+    title: `Project ${projectId} | Your App Name`,
+    description: "AI-powered code generation workspace",
+  };
+}
+
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const { projectId } = await params;
+
+  // Prefetch data for better UX
+  await Promise.all([
+    prefetch(trpc.message.getAll.queryOptions({ projectId })),
+    prefetch(trpc.project.getById.queryOptions({ projectId })),
+  ]);
 
   return (
     <HydrateClient>
-      {/* <ErrorBoundary fallback={<div>Error occurr...</div>}> */}
-      {/* <Suspense fallback={<div>Loading content...</div>}> */}
-      <Content projectId={params.projectId} />
-      {/* </Suspense> */}
-      {/* </ErrorBoundary> */}
+      <Content projectId={projectId} />
     </HydrateClient>
   );
 }

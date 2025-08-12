@@ -6,7 +6,7 @@ export async function connectSandbox({ sandboxId }: { sandboxId: string }) {
   return sandbox;
 }
 
-export function lastAssistantMessageContent(result: AgentResult) {
+export function extractLastAssistantMessageContent(result: AgentResult) {
   const lastAssistantMessageIndex = result.output.findLastIndex(
     (msg) => msg.role === "assistant"
   );
