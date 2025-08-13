@@ -29,11 +29,7 @@ export default function Content({ projectId }: Props) {
           className="flex flex-col min-h-0"
         >
           <ErrorBoundary fallback={<ErrorFallback />}>
-            <Suspense
-              fallback={
-                <LoadingFallback message="Please wait for a moment..." />
-              }
-            >
+            <Suspense fallback={<LoadingFallback message="Please wait..." />}>
               <ProjectHeader projectId={projectId} />
               <ChatWorkspace
                 projectId={projectId}

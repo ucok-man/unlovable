@@ -1,0 +1,76 @@
+import { Button } from "@/components/ui/button";
+
+const TEMPLATE_PROMPTS = [
+  {
+    emoji: "🎬",
+    title: "Build a Netflix clone",
+    prompt:
+      "Build a Netflix-style homepage with a hero banner (use a nice, dark-mode compatible gradient here), movie sections, responsive cards, and a modal for viewing details using mock data and local state. Use dark mode.",
+  },
+  {
+    emoji: "📦",
+    title: "Build an admin dashboard",
+    prompt:
+      "Create an admin dashboard with a sidebar, stat cards, a chart placeholder, and a basic table with filter and pagination using local state. Use clear visual grouping and balance in your design for a modern, professional look.",
+  },
+  {
+    emoji: "📋",
+    title: "Build a kanban board",
+    prompt:
+      "Build a kanban board with drag-and-drop using react-beautiful-dnd and support for adding and removing tasks with local state. Use consistent spacing, column widths, and hover effects for a polished UI.",
+  },
+  {
+    emoji: "🗂️",
+    title: "Build a file manager",
+    prompt:
+      "Build a file manager with folder list, file grid, and options to rename or delete items using mock data and local state. Focus on spacing, clear icons, and visual distinction between folders and files.",
+  },
+  {
+    emoji: "📺",
+    title: "Build a YouTube clone",
+    prompt:
+      "Build a YouTube-style homepage with mock video thumbnails, a category sidebar, and a modal preview with title and description using local state. Ensure clean alignment and a well-organized grid layout.",
+  },
+  {
+    emoji: "🛍️",
+    title: "Build a store page",
+    prompt:
+      "Build a store page with category filters, a product grid, and local cart logic to add and remove items. Focus on clear typography, spacing, and button states for a great e-commerce UI.",
+  },
+  {
+    emoji: "🏡",
+    title: "Build an Airbnb clone",
+    prompt:
+      "Build an Airbnb-style listings grid with mock data, filter sidebar, and a modal with property details using local state. Use card spacing, soft shadows, and clean layout for a welcoming design.",
+  },
+  {
+    emoji: "🎵",
+    title: "Build a Spotify clone",
+    prompt:
+      "Build a Spotify-style music player with a sidebar for playlists, a main area for song details, and playback controls. Use local state for managing playback and song selection. Prioritize layout balance and intuitive control placement for a smooth user experience. Use dark mode.",
+  },
+] as const;
+
+type Props = {
+  onSelect: (tmpl: (typeof TEMPLATE_PROMPTS)[number]) => void;
+};
+
+export default function TemplatePrompt({ onSelect }: Props) {
+  return (
+    <div className="flex-wrap justify-center gap-2 hidden md:flex max-w-3xl">
+      {TEMPLATE_PROMPTS.map((tmpl, idx) => (
+        <Button
+          key={idx}
+          variant={"outline"}
+          size={"sm"}
+          className="bg-secondary dark:bg-sidebar"
+          onClick={() => {
+            onSelect(tmpl);
+          }}
+        >
+          {tmpl.emoji} {tmpl.title}
+        </Button>
+      ))}
+    </div>
+  );
+}

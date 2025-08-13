@@ -1,4 +1,3 @@
-// components/project/ProjectHeader.tsx
 "use client";
 
 import { useProjectData } from "@/hooks/use-project";
