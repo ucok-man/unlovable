@@ -3,6 +3,7 @@
 import EmptyState from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserButton } from "@clerk/nextjs";
 import { Fragment } from "@prisma/client";
 import { Code2, Crown, EyeIcon } from "lucide-react";
 import Link from "next/link";
@@ -61,12 +62,25 @@ function ViewerHeader() {
         </TabsTrigger>
       </TabsList>
 
-      <Button asChild size="sm" variant="default">
-        <Link href="/pricing" className="flex items-center gap-2">
-          <Crown className="size-4" />
-          <span>Upgrade</span>
-        </Link>
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button asChild size="sm" variant="default">
+          <Link href="/pricing" className="flex items-center gap-2">
+            <Crown className="size-4" />
+            <span>Upgrade</span>
+          </Link>
+        </Button>
+
+        <UserButton
+          showName={false}
+          appearance={{
+            elements: {
+              userButtonBox: "rounded-md!",
+              userButtonAvatarBox: "rounded-md! size-8!",
+              userButtonTrigger: "rounded-md!",
+            },
+          }}
+        />
+      </div>
     </div>
   );
 }

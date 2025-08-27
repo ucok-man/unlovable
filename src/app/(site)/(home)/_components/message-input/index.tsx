@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
+import { useClerk } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpIcon, Loader2 } from "lucide-react";
@@ -31,6 +32,7 @@ export default function MessageInput() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const trpc = useTRPC();
+  const clerk = useClerk();
 
   const form = useForm<MessageFormData>({
     resolver: zodResolver(messageSchema),
@@ -46,8 +48,12 @@ export default function MessageInput() {
           router.push(`/project/${project.id}`);
         });
       },
-      onError: (error) => {
-        toast.error(error.message || "Failed to send message");
+      onError: (err) => {
+        if (err.data?.code === "UNAUTHORIZED") {
+          clerk.openSignIn();
+        } else {
+          toast.error(err.message || "Failed to send message");
+        }
       },
     })
   );

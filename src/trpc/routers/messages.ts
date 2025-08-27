@@ -1,9 +1,10 @@
 import { inngest } from "@/inngest/client";
+import { TRPCError } from "@trpc/server";
 import z from "zod";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const messagesRouter = createTRPCRouter({
-  create: baseProcedure
+  create: protectedProcedure
     .input(
       z.object({
         prompt: z
@@ -15,12 +16,25 @@ export const messagesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const project = await ctx.db.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+      });
+      if (!project) {
+        throw new TRPCError({
+          message: "Record not found",
+          code: "NOT_FOUND",
+        });
+      }
+
       const message = await ctx.db.message.create({
         data: {
           content: input.prompt,
           role: "USER",
           type: "RESULT",
-          projectId: input.projectId,
+          projectId: project.id,
         },
       });
 
@@ -35,7 +49,7 @@ export const messagesRouter = createTRPCRouter({
       return message;
     }),
 
-  getAll: baseProcedure
+  getAll: protectedProcedure
     .input(
       z.object({
         projectId: z.string().uuid({ message: "Invalid project id format" }),
@@ -45,6 +59,9 @@ export const messagesRouter = createTRPCRouter({
       const messages = ctx.db.message.findMany({
         where: {
           projectId: input.projectId,
+          project: {
+            userId: ctx.auth.userId,
+          },
         },
         orderBy: {
           updatedAt: "asc",

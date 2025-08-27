@@ -2,10 +2,10 @@ import { inngest } from "@/inngest/client";
 import { TRPCError } from "@trpc/server";
 import { generateSlug } from "random-word-slugs";
 import z from "zod";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const projectsRouter = createTRPCRouter({
-  create: baseProcedure
+  create: protectedProcedure
     .input(
       z.object({
         prompt: z
@@ -18,6 +18,7 @@ export const projectsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const project = await ctx.db.project.create({
         data: {
+          userId: ctx.auth.userId,
           name: generateSlug(2, {
             format: "kebab",
           }),
@@ -43,8 +44,11 @@ export const projectsRouter = createTRPCRouter({
       return project;
     }),
 
-  getAll: baseProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     const projects = ctx.db.project.findMany({
+      where: {
+        userId: ctx.auth.userId,
+      },
       orderBy: {
         updatedAt: "desc",
       },
@@ -52,7 +56,7 @@ export const projectsRouter = createTRPCRouter({
     return projects;
   }),
 
-  getById: baseProcedure
+  getById: protectedProcedure
     .input(
       z.object({
         projectId: z.string().uuid({ message: "Invalid project id format" }),
@@ -62,6 +66,7 @@ export const projectsRouter = createTRPCRouter({
       const project = ctx.db.project.findUnique({
         where: {
           id: input.projectId,
+          userId: ctx.auth.userId,
         },
       });
 
