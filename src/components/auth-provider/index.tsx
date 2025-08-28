@@ -19,6 +19,9 @@ export default function AuthProvider({ children }: Props) {
   return (
     <ClerkProvider
       appearance={{
+        variables: {
+          colorPrimary: isLight ? "#c96442" : "#d97757",
+        },
         theme: isLight ? experimental__simple : dark,
       }}
     >

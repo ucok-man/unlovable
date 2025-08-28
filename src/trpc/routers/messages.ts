@@ -16,6 +16,17 @@ export const messagesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const remainingCredits =
+        ctx.subscription.dailyCreditRemaining +
+        (ctx.subscription.monthlyCreditRemaining ?? 0);
+
+      if (remainingCredits <= 0) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "You have run out of credits",
+        });
+      }
+
       const project = await ctx.db.project.findUnique({
         where: {
           id: input.projectId,
@@ -24,7 +35,7 @@ export const messagesRouter = createTRPCRouter({
       });
       if (!project) {
         throw new TRPCError({
-          message: "Record not found",
+          message: "Oops! no project record found.",
           code: "NOT_FOUND",
         });
       }
@@ -41,6 +52,7 @@ export const messagesRouter = createTRPCRouter({
       await inngest.send({
         name: "generator/run",
         data: {
+          userId: ctx.auth.userId,
           value: message.content,
           projectId: message.projectId,
         },

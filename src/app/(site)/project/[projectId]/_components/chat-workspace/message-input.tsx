@@ -3,13 +3,14 @@ import { Form, FormField } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpIcon, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import TextAreaAutoResize from "react-textarea-autosize";
 import { toast } from "sonner";
 import { z } from "zod";
+import UsageLimit from "./usage-limit";
 
 const messageSchema = z.object({
   prompt: z
@@ -49,6 +50,12 @@ export default function MessageInput({ projectId }: Props) {
     })
   );
 
+  const subscription = useQuery(
+    trpc.subscription.getMine.queryOptions(undefined, {
+      refetchInterval: 5000,
+    })
+  );
+
   const handleSubmit = (data: MessageFormData) => {
     sendMessage.mutate({
       prompt: data.prompt,
@@ -67,6 +74,8 @@ export default function MessageInput({ projectId }: Props) {
 
   return (
     <Form {...form}>
+      {subscription.data && <UsageLimit subscription={subscription.data} />}
+
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn(

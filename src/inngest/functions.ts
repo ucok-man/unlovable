@@ -55,6 +55,9 @@ export const generator = inngest.createFunction(
     // Step 6: Save results to database
     await saveResults(step, result, sandboxUrl, event.data.projectId);
 
+    // Step 7: Consume subscription credits
+    await consumeCredits(step, event.data.userId);
+
     return {
       url: sandboxUrl,
       title: "Fragment",
@@ -309,5 +312,52 @@ async function saveResults(
         },
       },
     });
+  });
+}
+
+async function consumeCredits(step: any, uid: string) {
+  return await step.run("consume-credits", async () => {
+    const subscription = await db.subscription.findUnique({
+      where: {
+        userId: uid,
+      },
+    });
+
+    if (!subscription)
+      throw new Error(`No subscription found with accociated user id #${uid}`);
+
+    if (subscription.monthlyCreditRemaining) {
+      return await db.subscription.update({
+        where: {
+          id: subscription.id,
+        },
+        data: {
+          monthlyCreditRemaining: {
+            decrement: 1,
+          },
+          monthlyCreditConsumed: {
+            increment: 1,
+          },
+        },
+      });
+    }
+
+    if (subscription.dailyCreditRemaining) {
+      return await db.subscription.update({
+        where: {
+          id: subscription.id,
+        },
+        data: {
+          dailyCreditRemaining: {
+            decrement: 1,
+          },
+          dailyCreditConsumed: {
+            increment: 1,
+          },
+        },
+      });
+    }
+
+    throw new Error("Insufficient credits to create task");
   });
 }

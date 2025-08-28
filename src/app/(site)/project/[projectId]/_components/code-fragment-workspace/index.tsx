@@ -74,9 +74,9 @@ function ViewerHeader() {
           showName={false}
           appearance={{
             elements: {
-              userButtonBox: "rounded-md!",
-              userButtonAvatarBox: "rounded-md! size-8!",
-              userButtonTrigger: "rounded-md!",
+              userButtonBox: "rounded-lg!",
+              userButtonAvatarBox: "rounded-lg! size-8!",
+              userButtonTrigger: "rounded-lg!",
             },
           }}
         />
