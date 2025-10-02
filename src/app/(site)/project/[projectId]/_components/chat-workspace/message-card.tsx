@@ -69,11 +69,7 @@ function AssistantMessage({
   const isError = messageType === "ERROR";
 
   return (
-    <div
-      className={cn("flex flex-col group px-2 pb-4", {
-        "text-destructive": isError,
-      })}
-    >
+    <div className={cn("flex flex-col group px-2 pb-4")}>
       {/* Header */}
       <div className="flex items-center gap-2 pl-2 mb-2">
         <Image
@@ -90,7 +86,13 @@ function AssistantMessage({
       </div>
 
       <div className="pl-8.5 flex flex-col gap-y-4">
-        <p className="text-sm leading-relaxed">{content}</p>
+        <p
+          className={cn("text-sm leading-relaxed", {
+            "text-red-500": isError,
+          })}
+        >
+          {content}
+        </p>
 
         {/* Fragment Preview */}
         {fragment && messageType === "RESULT" && (

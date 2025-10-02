@@ -28,7 +28,7 @@ export function ErrorFallback({
   resetErrorBoundary?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
+    <div className="flex flex-col items-center justify-center p-8 text-center text-red-500">
       <AlertTriangle className="size-12 text-destructive mb-4" />
       <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
       <p className="text-sm text-muted-foreground mb-4 max-w-md">
