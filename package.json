@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n \"next,inngest\" -c \"blue,green\" \"next dev --turbopack\" \"pnpm dlx inngest-cli@latest dev\"",
-    "build": "next build",
+    "build": "pnpm prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "inngest:dev": "inngest-cli dev"
