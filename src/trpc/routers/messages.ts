@@ -1,9 +1,10 @@
 import { inngest } from "@/inngest/client";
+import { TRPCError } from "@trpc/server";
 import z from "zod";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { createTRPCRouter, protectedProcedure } from "../init";
 
 export const messagesRouter = createTRPCRouter({
-  create: baseProcedure
+  create: protectedProcedure
     .input(
       z.object({
         prompt: z
@@ -15,18 +16,43 @@ export const messagesRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const remainingCredits =
+        ctx.subscription.dailyCreditRemaining +
+        (ctx.subscription.monthlyCreditRemaining ?? 0);
+
+      if (remainingCredits <= 0) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "You have run out of credits",
+        });
+      }
+
+      const project = await ctx.db.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+      });
+      if (!project) {
+        throw new TRPCError({
+          message: "Oops! no project record found.",
+          code: "NOT_FOUND",
+        });
+      }
+
       const message = await ctx.db.message.create({
         data: {
           content: input.prompt,
           role: "USER",
           type: "RESULT",
-          projectId: input.projectId,
+          projectId: project.id,
         },
       });
 
       await inngest.send({
         name: "generator/run",
         data: {
+          userId: ctx.auth.userId,
           value: message.content,
           projectId: message.projectId,
         },
@@ -35,7 +61,7 @@ export const messagesRouter = createTRPCRouter({
       return message;
     }),
 
-  getAll: baseProcedure
+  getAll: protectedProcedure
     .input(
       z.object({
         projectId: z.string().uuid({ message: "Invalid project id format" }),
@@ -45,6 +71,9 @@ export const messagesRouter = createTRPCRouter({
       const messages = ctx.db.message.findMany({
         where: {
           projectId: input.projectId,
+          project: {
+            userId: ctx.auth.userId,
+          },
         },
         orderBy: {
           updatedAt: "asc",

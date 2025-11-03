@@ -42,9 +42,32 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name String
+  name   String
+  userId String
 
   messages Message[]
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String           @unique
+  plan   SubscriptionPlan @default(FREE)
+
+  dailyCreditRemaining Int
+  dailyCreditConsumed  Int
+  dailyReset           DateTime
+
+  monthlyCreditRemaining Int?
+  monthlyCreditConsumed  Int?
+  monthlyReset           DateTime?
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
 }
 
 enum MessageType {
